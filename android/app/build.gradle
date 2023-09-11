@@ -73,9 +73,9 @@ android {
 
     compileSdkVersion rootProject.ext.compileSdkVersion
 
-    namespace "com.chatapp"
+    namespace "com.yuhyeon.chatapp"
     defaultConfig {
-        applicationId "com.chatapp"
+        applicationId "com.yuhyeon.chatapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

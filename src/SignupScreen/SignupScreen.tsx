@@ -1,10 +1,6 @@
 import React from 'react';
-import {View, Text} from 'react-native';
+import Screen from '../components/Screen';
 
 export default function SignupScreen() {
-    return (
-        <View>
-            <Text>SignupScreen</Text>
-        </View>
-    );
+    return <Screen title="회원가입" />;
 }

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "127657687871",
+    "project_id": "chatapp-2f3f8",
+    "storage_bucket": "chatapp-2f3f8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:127657687871:android:155fb643ff183bc3b0318a",
+        "android_client_info": {
+          "package_name": "com.yuhyeon.chatapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBacQKFG0lhM_22hQqefWUoiYN4AEhSMh4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

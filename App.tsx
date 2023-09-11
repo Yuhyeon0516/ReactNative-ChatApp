@@ -3,6 +3,7 @@ import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import React from 'react';
 import {RootStackParamList} from './src/types';
 import SignupScreen from './src/SignupScreen/SignupScreen';
+import AuthProvider from './src/components/AuthProvider';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -17,7 +18,11 @@ function Screens() {
 }
 
 function App(): JSX.Element {
-    return <Screens />;
+    return (
+        <AuthProvider>
+            <Screens />
+        </AuthProvider>
+    );
 }
 
 export default App;

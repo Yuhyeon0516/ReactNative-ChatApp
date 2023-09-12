@@ -3,6 +3,10 @@ export type RootStackParamList = {
     Signin: undefined;
     Home: undefined;
     Loading: undefined;
+    Chat: {
+        userIds: string[];
+        other: User;
+    };
 };
 
 export interface User {
@@ -22,4 +26,11 @@ export interface AuthContextProp {
 
 export enum Collections {
     USERS = 'users',
+    CHATS = 'chats',
+}
+
+export interface Chat {
+    id: string;
+    userIds: string[];
+    users: User[];
 }

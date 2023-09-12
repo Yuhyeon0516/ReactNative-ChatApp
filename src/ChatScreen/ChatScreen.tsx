@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useContext, useMemo, useState} from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -14,6 +14,7 @@ import {RouteProp, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../types';
 import useChat from './useChat';
 import {Colors} from '../modules/Colors';
+import AuthContext from '../components/AuthContext';
 
 const styles = StyleSheet.create({
     container: {
@@ -93,18 +94,21 @@ const disableSendButtonStyle = [
 
 export default function ChatScreen() {
     const {params} = useRoute<RouteProp<RootStackParamList, 'Chat'>>();
-    const {loadingChat, chat} = useChat(params.userIds);
+    const {loadingChat, chat, sendMessage} = useChat(params.userIds);
     const [text, setText] = useState('');
     const sendDisabled = useMemo(() => text.length === 0, [text.length]);
+    const {user: me} = useContext(AuthContext);
 
     const onChagneText = useCallback((newText: string) => {
         setText(newText);
     }, []);
 
     const onPressSendButton = useCallback(() => {
-        // TODO: send text
-        setText('');
-    }, []);
+        if (me !== null) {
+            sendMessage(text, me);
+            setText('');
+        }
+    }, [me, sendMessage, text]);
 
     const renderChat = useCallback(() => {
         if (chat === null) return null;
@@ -132,6 +136,7 @@ export default function ChatScreen() {
                 <View style={styles.inputContainer}>
                     <View style={styles.textInputContainer}>
                         <TextInput
+                            autoCapitalize="none"
                             multiline
                             style={styles.textInput}
                             value={text}

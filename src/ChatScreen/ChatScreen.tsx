@@ -15,6 +15,7 @@ import {RootStackParamList} from '../types';
 import useChat from './useChat';
 import {Colors} from '../modules/Colors';
 import AuthContext from '../components/AuthContext';
+import Message from './Message';
 
 const styles = StyleSheet.create({
     container: {
@@ -54,6 +55,7 @@ const styles = StyleSheet.create({
     },
     messageList: {
         flex: 1,
+        marginVertical: 10,
     },
     inputContainer: {
         flexDirection: 'row',
@@ -84,6 +86,9 @@ const styles = StyleSheet.create({
     sendIcon: {
         color: Colors.WHITE,
         fontSize: 18,
+    },
+    messageSeparator: {
+        height: 8,
     },
 });
 
@@ -136,17 +141,24 @@ export default function ChatScreen() {
                 </View>
 
                 <FlatList
+                    inverted
                     data={messages}
                     style={styles.messageList}
                     renderItem={({item: message}) => {
                         return (
-                            <View>
-                                <Text>{message.user.name}</Text>
-                                <Text>{message.text}</Text>
-                                <Text>{message.createdAt.toISOString()}</Text>
-                            </View>
+                            <Message
+                                name={message.user.name}
+                                text={message.text}
+                                createdAt={message.createdAt}
+                                isOtherMessage={
+                                    message.user.userId !== me?.userId
+                                }
+                            />
                         );
                     }}
+                    ItemSeparatorComponent={() => (
+                        <View style={styles.messageSeparator} />
+                    )}
                 />
                 <View style={styles.inputContainer}>
                     <View style={styles.textInputContainer}>
@@ -172,7 +184,15 @@ export default function ChatScreen() {
                 </View>
             </View>
         );
-    }, [chat, messages, onChagneText, onPressSendButton, sendDisabled, text]);
+    }, [
+        chat,
+        me?.userId,
+        messages,
+        onChagneText,
+        onPressSendButton,
+        sendDisabled,
+        text,
+    ]);
 
     return (
         <Screen title={params.other.name}>

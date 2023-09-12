@@ -47,8 +47,6 @@ function AuthProvider({children}: {children: React.ReactNode}) {
                     .collection(Collections.USERS)
                     .doc(currentUser.uid)
                     .set({userId: currentUser.uid, email, name});
-            } catch (error) {
-                console.log(error);
             } finally {
                 setProcessingSignup(false);
             }
@@ -61,8 +59,6 @@ function AuthProvider({children}: {children: React.ReactNode}) {
 
         try {
             await auth().signInWithEmailAndPassword(email, password);
-        } catch (error) {
-            console.log(error);
         } finally {
             setProcessingSignin(false);
         }

@@ -132,7 +132,6 @@ function useChat(userIds: string[]) {
         messages,
         sending,
         sendMessage,
-        loadMessages,
         loadingMessages,
     };
 }

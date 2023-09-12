@@ -6,6 +6,8 @@ const AuthContext = createContext<AuthContextProp>({
     user: null,
     signup: async () => {},
     processingSignup: false,
+    signin: async () => {},
+    processingSignin: false,
 });
 
 export default AuthContext;

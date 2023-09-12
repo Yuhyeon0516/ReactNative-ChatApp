@@ -13,6 +13,7 @@ export interface User {
     userId: string;
     email: string;
     name: string;
+    profileUrl?: string;
 }
 
 export interface AuthContextProp {
@@ -22,6 +23,7 @@ export interface AuthContextProp {
     processingSignup: boolean;
     signin: (email: string, password: string) => Promise<void>;
     processingSignin: boolean;
+    updateProfileImage: (filepath: string) => Promise<void>;
 }
 
 export enum Collections {

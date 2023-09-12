@@ -14,6 +14,8 @@ import AuthContext from '../components/AuthContext';
 import {Colors} from '../modules/Colors';
 import {Collections, RootStackParamList, User} from '../types';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
+import ImageCropPicker from 'react-native-image-crop-picker';
+import Profile from './Profile';
 
 const styles = StyleSheet.create({
     container: {
@@ -84,10 +86,13 @@ const styles = StyleSheet.create({
     emptyText: {
         color: Colors.BLACK,
     },
+    profile: {
+        marginRight: 10,
+    },
 });
 
 export default function HomeScreen() {
-    const {user: me} = useContext(AuthContext);
+    const {user: me, updateProfileImage} = useContext(AuthContext);
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
@@ -112,6 +117,15 @@ export default function HomeScreen() {
         }
     }, [me?.userId]);
 
+    const onPressProfile = useCallback(async () => {
+        const image = await ImageCropPicker.openPicker({
+            cropping: true,
+            cropperCircleOverlay: true,
+        });
+
+        await updateProfileImage(image.path);
+    }, [updateProfileImage]);
+
     const renderLoading = useCallback(
         () => (
             <View style={styles.loadingContainer}>
@@ -134,6 +148,11 @@ export default function HomeScreen() {
                     <Text style={styles.sectionTitleText}>나의 정보</Text>
 
                     <View style={styles.userSectionContext}>
+                        <Profile
+                            style={styles.profile}
+                            onPress={onPressProfile}
+                            imageUrl={me.profileUrl}
+                        />
                         <View style={styles.myProfile}>
                             <Text style={styles.myNameText}>{me.name}</Text>
                             <Text style={styles.myEmailText}>{me.email}</Text>

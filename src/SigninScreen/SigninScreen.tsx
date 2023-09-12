@@ -1,6 +1,144 @@
-import React from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import Screen from '../components/Screen';
+import validator from 'validator';
+import {
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
+} from 'react-native';
+import {Colors} from '../modules/Colors';
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        padding: 20,
+    },
+    section: {
+        marginBottom: 20,
+    },
+    title: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: Colors.BLACK,
+    },
+    input: {
+        marginTop: 10,
+        borderWidth: 1,
+        padding: 10,
+        borderRadius: 10,
+        borderColor: Colors.GRAY,
+        fontSize: 16,
+    },
+    errorText: {
+        fontSize: 14,
+        color: Colors.RED,
+        marginTop: 4,
+    },
+    signinButton: {
+        backgroundColor: Colors.BLACK,
+        borderRadius: 10,
+        alignItems: 'center',
+        padding: 20,
+    },
+    disabledSigninButton: {
+        backgroundColor: Colors.GRAY,
+    },
+    signinButtonText: {
+        color: Colors.WHITE,
+        fontSize: 16,
+        fontWeight: 'bold',
+    },
+});
 
 export default function SigninScreen() {
-    return <Screen title="로그인" />;
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+
+    const emailErrorText = useMemo(() => {
+        if (email.length === 0) {
+            return '이메일을 입력해주세요.';
+        }
+
+        if (!validator.isEmail(email)) {
+            return '올바를 이메일이 아닙니다.';
+        }
+
+        return null;
+    }, [email]);
+
+    const passwordErrorText = useMemo(() => {
+        if (password.length === 0) {
+            return '비밀번호를 입력해주세요.';
+        }
+
+        if (password.length < 6) {
+            return '비밀번호는 6자리 이상이어야합니다.';
+        }
+
+        return null;
+    }, [password]);
+
+    const onChangeEmailText = useCallback((text: string) => {
+        setEmail(text);
+    }, []);
+    const onChangePasswordText = useCallback((text: string) => {
+        setPassword(text);
+    }, []);
+    const onPressSigninButton = useCallback(() => {}, []);
+
+    const singinButtonEnabled = useMemo(() => {
+        return !emailErrorText && !passwordErrorText;
+    }, [emailErrorText, passwordErrorText]);
+
+    const signinButtonStyle = useMemo(() => {
+        if (singinButtonEnabled) {
+            return styles.signinButton;
+        }
+
+        return [styles.signinButton, styles.disabledSigninButton];
+    }, [singinButtonEnabled]);
+
+    return (
+        <Screen title="로그인">
+            <View style={styles.container}>
+                <View style={styles.section}>
+                    <Text style={styles.title}>이메일</Text>
+                    <TextInput
+                        value={email}
+                        style={styles.input}
+                        onChangeText={onChangeEmailText}
+                    />
+                    {emailErrorText && (
+                        <Text style={styles.errorText}>{emailErrorText}</Text>
+                    )}
+                </View>
+
+                <View style={styles.section}>
+                    <Text style={styles.title}>비밀번호</Text>
+                    <TextInput
+                        secureTextEntry
+                        value={password}
+                        style={styles.input}
+                        onChangeText={onChangePasswordText}
+                    />
+                    {passwordErrorText && (
+                        <Text style={styles.errorText}>
+                            {passwordErrorText}
+                        </Text>
+                    )}
+                </View>
+
+                <View>
+                    <TouchableOpacity
+                        style={signinButtonStyle}
+                        disabled={!singinButtonEnabled}
+                        onPress={onPressSigninButton}>
+                        <Text style={styles.signinButtonText}>로그인</Text>
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </Screen>
+    );
 }

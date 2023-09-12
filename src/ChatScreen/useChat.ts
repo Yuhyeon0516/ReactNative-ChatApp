@@ -12,6 +12,7 @@ function useChat(userIds: string[]) {
     const [loadingChat, setLoadingChat] = useState(false);
     const [messages, setMessages] = useState<Message[]>([]);
     const [sending, setSending] = useState(false);
+    const [loadingMessages, setLoadingMessages] = useState(false);
 
     const loadChat = useCallback(async () => {
         try {
@@ -56,6 +57,10 @@ function useChat(userIds: string[]) {
         }
     }, [userIds]);
 
+    useEffect(() => {
+        loadChat();
+    }, [loadChat]);
+
     const sendMessage = useCallback(
         async (text: string, user: User) => {
             if (chat === null) throw new Error('Chat is not loaded');
@@ -88,9 +93,38 @@ function useChat(userIds: string[]) {
         [chat],
     );
 
+    const loadMessages = useCallback(async (chatId: string) => {
+        try {
+            setLoadingMessages(true);
+            const messagesSnapshot = await firestore()
+                .collection(Collections.CHATS)
+                .doc(chatId)
+                .collection(Collections.MESSAGES)
+                .orderBy('createdAt', 'asc')
+                .get();
+
+            const ms = messagesSnapshot.docs.map<Message>(doc => {
+                const data = doc.data();
+
+                return {
+                    id: doc.id,
+                    user: data.user,
+                    text: data.text,
+                    createdAt: data.createdAt.toDate(),
+                };
+            });
+
+            setMessages(ms);
+        } finally {
+            setLoadingMessages(false);
+        }
+    }, []);
+
     useEffect(() => {
-        loadChat();
-    }, [loadChat]);
+        if (chat?.id) {
+            loadMessages(chat.id);
+        }
+    }, [chat?.id, loadMessages]);
 
     return {
         chat,
@@ -98,6 +132,8 @@ function useChat(userIds: string[]) {
         messages,
         sending,
         sendMessage,
+        loadMessages,
+        loadingMessages,
     };
 }
 

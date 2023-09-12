@@ -1,9 +1,18 @@
-import React, {useCallback, useContext} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, {useCallback, useContext, useEffect, useState} from 'react';
+import {
+    ActivityIndicator,
+    FlatList,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from 'react-native';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import Screen from '../components/Screen';
 import AuthContext from '../components/AuthContext';
 import {Colors} from '../modules/Colors';
+import {Collections, User} from '../types';
 
 const styles = StyleSheet.create({
     container: {
@@ -41,14 +50,78 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: Colors.WHITE,
     },
+    userListSection: {
+        flex: 1,
+        marginTop: 40,
+    },
+    loadingContainer: {
+        flex: 1,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    userList: {
+        flex: 1,
+    },
+    userListItem: {
+        backgroundColor: Colors.LIGHT_GRAY,
+        borderRadius: 12,
+        padding: 20,
+    },
+    otherNameText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        color: Colors.BLACK,
+    },
+    otherEmailText: {
+        fontSize: 14,
+        color: Colors.BLACK,
+        marginTop: 4,
+    },
+    separator: {
+        height: 10,
+    },
+    emptyText: {
+        color: Colors.BLACK,
+    },
 });
 
 export default function HomeScreen() {
     const {user: me} = useContext(AuthContext);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [users, setUsers] = useState<User[]>([]);
 
     const onPressLogout = useCallback(() => {
         auth().signOut();
     }, []);
+
+    const loadUsers = useCallback(async () => {
+        try {
+            setLoadingUsers(true);
+            const snapshot = await firestore()
+                .collection(Collections.USERS)
+                .get();
+            setUsers(
+                snapshot.docs
+                    .map(doc => doc.data() as User)
+                    .filter(user => user.userId !== me?.userId),
+            );
+        } finally {
+            setLoadingUsers(false);
+        }
+    }, [me?.userId]);
+
+    const renderLoading = useCallback(
+        () => (
+            <View style={styles.loadingContainer}>
+                <ActivityIndicator />
+            </View>
+        ),
+        [],
+    );
+
+    useEffect(() => {
+        loadUsers();
+    }, [loadUsers]);
 
     if (me === null) return null;
 
@@ -68,6 +141,43 @@ export default function HomeScreen() {
                             <Text style={styles.logoutText}>로그아웃</Text>
                         </TouchableOpacity>
                     </View>
+                </View>
+
+                <View style={styles.userListSection}>
+                    {loadingUsers ? (
+                        renderLoading()
+                    ) : (
+                        <>
+                            <Text style={styles.sectionTitleText}>
+                                다른 사용자와 대화해보세요!
+                            </Text>
+
+                            <FlatList
+                                style={styles.userList}
+                                data={users}
+                                renderItem={({item: user}) => (
+                                    <TouchableOpacity
+                                        style={styles.userListItem}
+                                        onPress={() => {}}>
+                                        <Text style={styles.otherNameText}>
+                                            {user.name}
+                                        </Text>
+                                        <Text style={styles.otherEmailText}>
+                                            {user.email}
+                                        </Text>
+                                    </TouchableOpacity>
+                                )}
+                                ItemSeparatorComponent={() => (
+                                    <View style={styles.separator} />
+                                )}
+                                ListEmptyComponent={() => (
+                                    <Text style={styles.emptyText}>
+                                        사용자가 없습니다.
+                                    </Text>
+                                )}
+                            />
+                        </>
+                    )}
                 </View>
             </View>
         </Screen>

@@ -16,6 +16,7 @@ import {Collections, RootStackParamList, User} from '../types';
 import {NavigationProp, useNavigation} from '@react-navigation/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import Profile from './Profile';
+import UserPhoto from '../components/UserPhoto';
 
 const styles = StyleSheet.create({
     container: {
@@ -69,6 +70,8 @@ const styles = StyleSheet.create({
         backgroundColor: Colors.LIGHT_GRAY,
         borderRadius: 12,
         padding: 20,
+        flexDirection: 'row',
+        alignItems: 'center',
     },
     otherNameText: {
         fontSize: 16,
@@ -88,6 +91,14 @@ const styles = StyleSheet.create({
     },
     profile: {
         marginRight: 10,
+    },
+    userPhoto: {
+        marginRight: 10,
+    },
+    photoNameText: {
+        color: Colors.WHITE,
+        fontSize: 16,
+        fontWeight: 'bold',
     },
 });
 
@@ -188,12 +199,20 @@ export default function HomeScreen() {
                                                 other: user,
                                             });
                                         }}>
-                                        <Text style={styles.otherNameText}>
-                                            {user.name}
-                                        </Text>
-                                        <Text style={styles.otherEmailText}>
-                                            {user.email}
-                                        </Text>
+                                        <UserPhoto
+                                            style={styles.userPhoto}
+                                            imageUrl={user.profileUrl}
+                                            name={user.name}
+                                            nameStyle={styles.photoNameText}
+                                        />
+                                        <View>
+                                            <Text style={styles.otherNameText}>
+                                                {user.name}
+                                            </Text>
+                                            <Text style={styles.otherEmailText}>
+                                                {user.email}
+                                            </Text>
+                                        </View>
                                     </TouchableOpacity>
                                 )}
                                 ItemSeparatorComponent={() => (

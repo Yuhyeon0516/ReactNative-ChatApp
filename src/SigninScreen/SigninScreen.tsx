@@ -1,7 +1,9 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useContext, useMemo, useState} from 'react';
 import Screen from '../components/Screen';
 import validator from 'validator';
 import {
+    ActivityIndicator,
+    Alert,
     StyleSheet,
     Text,
     TextInput,
@@ -9,6 +11,7 @@ import {
     View,
 } from 'react-native';
 import {Colors} from '../modules/Colors';
+import AuthContext from '../components/AuthContext';
 
 const styles = StyleSheet.create({
     container: {
@@ -50,11 +53,17 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
+    signingContainer: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
 
 export default function SigninScreen() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const {signin, processingSignin} = useContext(AuthContext);
 
     const emailErrorText = useMemo(() => {
         if (email.length === 0) {
@@ -86,7 +95,13 @@ export default function SigninScreen() {
     const onChangePasswordText = useCallback((text: string) => {
         setPassword(text);
     }, []);
-    const onPressSigninButton = useCallback(() => {}, []);
+    const onPressSigninButton = useCallback(async () => {
+        try {
+            await signin(email, password);
+        } catch (error: any) {
+            Alert.alert(error.message);
+        }
+    }, [email, password, signin]);
 
     const singinButtonEnabled = useMemo(() => {
         return !emailErrorText && !passwordErrorText;
@@ -103,41 +118,55 @@ export default function SigninScreen() {
     return (
         <Screen title="로그인">
             <View style={styles.container}>
-                <View style={styles.section}>
-                    <Text style={styles.title}>이메일</Text>
-                    <TextInput
-                        value={email}
-                        style={styles.input}
-                        onChangeText={onChangeEmailText}
-                    />
-                    {emailErrorText && (
-                        <Text style={styles.errorText}>{emailErrorText}</Text>
-                    )}
-                </View>
+                {processingSignin ? (
+                    <View style={styles.signingContainer}>
+                        <ActivityIndicator />
+                    </View>
+                ) : (
+                    <>
+                        <View style={styles.section}>
+                            <Text style={styles.title}>이메일</Text>
+                            <TextInput
+                                autoCapitalize="none"
+                                value={email}
+                                style={styles.input}
+                                onChangeText={onChangeEmailText}
+                            />
+                            {emailErrorText && (
+                                <Text style={styles.errorText}>
+                                    {emailErrorText}
+                                </Text>
+                            )}
+                        </View>
 
-                <View style={styles.section}>
-                    <Text style={styles.title}>비밀번호</Text>
-                    <TextInput
-                        secureTextEntry
-                        value={password}
-                        style={styles.input}
-                        onChangeText={onChangePasswordText}
-                    />
-                    {passwordErrorText && (
-                        <Text style={styles.errorText}>
-                            {passwordErrorText}
-                        </Text>
-                    )}
-                </View>
+                        <View style={styles.section}>
+                            <Text style={styles.title}>비밀번호</Text>
+                            <TextInput
+                                secureTextEntry
+                                autoCapitalize="none"
+                                value={password}
+                                style={styles.input}
+                                onChangeText={onChangePasswordText}
+                            />
+                            {passwordErrorText && (
+                                <Text style={styles.errorText}>
+                                    {passwordErrorText}
+                                </Text>
+                            )}
+                        </View>
 
-                <View>
-                    <TouchableOpacity
-                        style={signinButtonStyle}
-                        disabled={!singinButtonEnabled}
-                        onPress={onPressSigninButton}>
-                        <Text style={styles.signinButtonText}>로그인</Text>
-                    </TouchableOpacity>
-                </View>
+                        <View>
+                            <TouchableOpacity
+                                style={signinButtonStyle}
+                                disabled={!singinButtonEnabled}
+                                onPress={onPressSigninButton}>
+                                <Text style={styles.signinButtonText}>
+                                    로그인
+                                </Text>
+                            </TouchableOpacity>
+                        </View>
+                    </>
+                )}
             </View>
         </Screen>
     );

@@ -13,6 +13,8 @@ import {
 } from 'react-native';
 import {Colors} from '../modules/Colors';
 import AuthContext from '../components/AuthContext';
+import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {RootStackParamList} from '../types';
 
 const styles = StyleSheet.create({
     container: {
@@ -76,6 +78,7 @@ export default function SignupScreen() {
     const [confirmedPassword, setConfirmedPassword] = useState('');
     const [name, setName] = useState('');
     const {processingSignup, signup} = useContext(AuthContext);
+    const navigation = useNavigation<NavigationProp<RootStackParamList>>();
 
     const emailErrorText = useMemo(() => {
         if (email.length === 0) {
@@ -172,7 +175,9 @@ export default function SignupScreen() {
         }
     }, [email, name, password, signup]);
 
-    const onPressSigninButton = useCallback(() => {}, []);
+    const onPressSigninButton = useCallback(() => {
+        navigation.navigate('Signin');
+    }, [navigation]);
 
     return (
         <Screen title="회원 가입">

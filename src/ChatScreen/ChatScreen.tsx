@@ -136,6 +136,7 @@ export default function ChatScreen() {
                 </View>
 
                 <FlatList
+                    inverted
                     data={messages}
                     style={styles.messageList}
                     renderItem={({item: message}) => {

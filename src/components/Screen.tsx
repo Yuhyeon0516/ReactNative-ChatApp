@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import {Colors} from '../modules/Colors';
 import {useNavigation} from '@react-navigation/native';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const styles = StyleSheet.create({
     container: {
@@ -19,7 +20,6 @@ const styles = StyleSheet.create({
     },
     left: {
         flex: 1,
-        alignItems: 'center',
         justifyContent: 'center',
     },
     center: {
@@ -38,9 +38,10 @@ const styles = StyleSheet.create({
     body: {
         flex: 1,
     },
-    backButtonText: {
-        fontSize: 12,
+    backButtonIcon: {
         color: Colors.BLACK,
+        fontSize: 20,
+        marginLeft: 20,
     },
 });
 
@@ -61,7 +62,10 @@ export default function Screen({children, title}: ScreenProps) {
                 <View style={styles.left}>
                     {navigation.canGoBack() && (
                         <TouchableOpacity onPress={onPressBackButton}>
-                            <Text style={styles.backButtonText}>{'Back'}</Text>
+                            <MaterialIcons
+                                name="arrow-back"
+                                style={styles.backButtonIcon}
+                            />
                         </TouchableOpacity>
                     )}
                 </View>

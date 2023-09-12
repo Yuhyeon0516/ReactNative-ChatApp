@@ -94,10 +94,13 @@ const disableSendButtonStyle = [
 
 export default function ChatScreen() {
     const {params} = useRoute<RouteProp<RootStackParamList, 'Chat'>>();
-    const {loadingChat, chat, sendMessage} = useChat(params.userIds);
+    const {loadingChat, chat, sendMessage, messages, loadingMessages} = useChat(
+        params.userIds,
+    );
     const [text, setText] = useState('');
     const sendDisabled = useMemo(() => text.length === 0, [text.length]);
     const {user: me} = useContext(AuthContext);
+    const loading = loadingChat || loadingMessages;
 
     const onChagneText = useCallback((newText: string) => {
         setText(newText);
@@ -132,7 +135,19 @@ export default function ChatScreen() {
                     />
                 </View>
 
-                <View style={styles.messageList} />
+                <FlatList
+                    data={messages}
+                    style={styles.messageList}
+                    renderItem={({item: message}) => {
+                        return (
+                            <View>
+                                <Text>{message.user.name}</Text>
+                                <Text>{message.text}</Text>
+                                <Text>{message.createdAt.toISOString()}</Text>
+                            </View>
+                        );
+                    }}
+                />
                 <View style={styles.inputContainer}>
                     <View style={styles.textInputContainer}>
                         <TextInput
@@ -157,12 +172,12 @@ export default function ChatScreen() {
                 </View>
             </View>
         );
-    }, [chat, onChagneText, onPressSendButton, sendDisabled, text]);
+    }, [chat, messages, onChagneText, onPressSendButton, sendDisabled, text]);
 
     return (
         <Screen title={params.other.name}>
             <View style={styles.container}>
-                {loadingChat ? (
+                {loading ? (
                     <View style={styles.loadingContainer}>
                         <ActivityIndicator />
                     </View>

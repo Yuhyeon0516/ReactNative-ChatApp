@@ -98,6 +98,20 @@ const styles = StyleSheet.create({
     messageSeparator: {
         height: 8,
     },
+    imageButton: {
+        borderWidth: 1,
+        borderColor: Colors.BLACK,
+        borderRadius: 8,
+        marginLeft: 8,
+        width: 50,
+        height: 50,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    imageIcon: {
+        color: Colors.BLACK,
+        fontSize: 32,
+    },
 });
 
 const disableSendButtonStyle = [
@@ -135,6 +149,8 @@ export default function ChatScreen() {
             setText('');
         }
     }, [me, sendMessage, text]);
+
+    const onPressImageButton = useCallback(() => {}, []);
 
     const renderChat = useCallback(() => {
         if (chat === null) return null;
@@ -220,6 +236,12 @@ export default function ChatScreen() {
                         disabled={sendDisabled}>
                         <MaterialIcons name="send" style={styles.sendIcon} />
                     </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.imageButton}
+                        onPress={onPressImageButton}>
+                        <MaterialIcons name="image" style={styles.imageIcon} />
+                    </TouchableOpacity>
                 </View>
             </View>
         );
@@ -228,6 +250,7 @@ export default function ChatScreen() {
         me?.userId,
         messages,
         onChagneText,
+        onPressImageButton,
         onPressSendButton,
         sendDisabled,
         text,

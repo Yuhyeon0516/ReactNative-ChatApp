@@ -3,15 +3,7 @@ import React, {useCallback} from 'react';
 import {View, Text, StyleSheet} from 'react-native';
 import {Colors} from '../modules/Colors';
 import UserPhoto from '../components/UserPhoto';
-
-interface MessageProps {
-    name: string;
-    text: string;
-    createdAt: Date;
-    isOtherMessage: boolean;
-    imageUrl?: string;
-    unreadCount?: number;
-}
+import ImageMessage from './ImageMessage';
 
 const styles = StyleSheet.create({
     container: {
@@ -74,15 +66,43 @@ const otherMessageStyles = {
     ],
 };
 
+interface TextMessage {
+    text: string;
+}
+
+interface ImageMessage {
+    url: string;
+}
+
+interface MessageProps {
+    name: string;
+    message: TextMessage | ImageMessage;
+    createdAt: Date;
+    isOtherMessage: boolean;
+    userImageUrl?: string;
+    unreadCount?: number;
+}
+
 export default function Message({
     name,
-    text,
+    message,
     createdAt,
     isOtherMessage,
-    imageUrl,
+    userImageUrl,
     unreadCount = 0,
 }: MessageProps) {
     const messageStyles = isOtherMessage ? otherMessageStyles : styles;
+    const renderMessage = useCallback(() => {
+        if ('text' in message) {
+            return (
+                <Text style={messageStyles.messageText}>{message.text}</Text>
+            );
+        }
+        if ('url' in message) {
+            return <ImageMessage url={message.url} />;
+        }
+    }, [message, messageStyles.messageText]);
+
     const renderMessageContainer = useCallback(() => {
         const components = [
             <View key={'metaInfo'} style={messageStyles.metaInfo}>
@@ -94,18 +114,18 @@ export default function Message({
                 </Text>
             </View>,
             <View key={'message'} style={messageStyles.bubble}>
-                <Text style={messageStyles.messageText}>{text}</Text>
+                {renderMessage()}
             </View>,
         ];
         return isOtherMessage ? components.reverse() : components;
-    }, [createdAt, isOtherMessage, messageStyles, text, unreadCount]);
+    }, [createdAt, isOtherMessage, messageStyles, unreadCount, renderMessage]);
 
     return (
         <View style={styles.root}>
             {isOtherMessage && (
                 <UserPhoto
                     style={styles.userPhoto}
-                    imageUrl={imageUrl}
+                    imageUrl={userImageUrl}
                     name={name}
                     nameStyle={styles.photoNameText}
                     size={48}

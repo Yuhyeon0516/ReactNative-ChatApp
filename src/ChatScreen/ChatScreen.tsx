@@ -24,6 +24,7 @@ import AuthContext from '../components/AuthContext';
 import Message from './Message';
 import UserPhoto from '../components/UserPhoto';
 import moment from 'moment';
+import ImageCropPicker from 'react-native-image-crop-picker';
 
 const styles = StyleSheet.create({
     container: {
@@ -112,6 +113,10 @@ const styles = StyleSheet.create({
         color: Colors.BLACK,
         fontSize: 32,
     },
+    sendingContainer: {
+        alignItems: 'flex-end',
+        paddingTop: 10,
+    },
 });
 
 const disableSendButtonStyle = [
@@ -129,6 +134,8 @@ export default function ChatScreen() {
         loadingMessages,
         updateMessageReadAt,
         userToMessageReadAt,
+        sendImageMessage,
+        sending,
     } = useChat(params.userIds);
     const [text, setText] = useState('');
     const sendDisabled = useMemo(() => text.length === 0, [text.length]);
@@ -150,7 +157,15 @@ export default function ChatScreen() {
         }
     }, [me, sendMessage, text]);
 
-    const onPressImageButton = useCallback(() => {}, []);
+    const onPressImageButton = useCallback(async () => {
+        if (me) {
+            const image = await ImageCropPicker.openPicker({
+                cropping: true,
+            });
+
+            sendImageMessage(image.path, me);
+        }
+    }, [me, sendImageMessage]);
 
     const renderChat = useCallback(() => {
         if (chat === null) return null;
@@ -198,22 +213,47 @@ export default function ChatScreen() {
 
                         const unreadCount = unreadUsers.length - 1;
 
-                        return (
-                            <Message
-                                name={user?.name ?? ''}
-                                text={message.text ?? ''}
-                                createdAt={message.createdAt}
-                                isOtherMessage={
-                                    message.user.userId !== me?.userId
-                                }
-                                imageUrl={user?.profileUrl}
-                                unreadCount={unreadCount}
-                            />
-                        );
+                        const commonProps = {
+                            name: user?.name ?? '',
+                            createdAt: message.createdAt,
+                            isOtherMessage: message.user.userId !== me?.userId,
+                            userImageUrl: user?.profileUrl,
+                            unreadCount: unreadCount,
+                        };
+
+                        if (message.text != null) {
+                            return (
+                                <Message
+                                    {...commonProps}
+                                    message={{text: message.text}}
+                                />
+                            );
+                        }
+
+                        if (message.imageUrl != null) {
+                            return (
+                                <Message
+                                    {...commonProps}
+                                    message={{url: message.imageUrl}}
+                                />
+                            );
+                        }
+                        return null;
                     }}
                     ItemSeparatorComponent={() => (
                         <View style={styles.messageSeparator} />
                     )}
+                    ListHeaderComponent={() => {
+                        if (sending) {
+                            return (
+                                <View style={styles.sendingContainer}>
+                                    <ActivityIndicator />
+                                </View>
+                            );
+                        }
+
+                        return null;
+                    }}
                 />
                 <View style={styles.inputContainer}>
                     <View style={styles.textInputContainer}>
@@ -253,6 +293,7 @@ export default function ChatScreen() {
         onPressImageButton,
         onPressSendButton,
         sendDisabled,
+        sending,
         text,
         userToMessageReadAt,
     ]);

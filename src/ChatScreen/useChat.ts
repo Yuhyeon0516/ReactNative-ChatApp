@@ -1,7 +1,9 @@
 import {useCallback, useEffect, useState} from 'react';
-import {Chat, Collections, FirestoreMessageData, Message, User} from '../types';
+import {Chat, Collections, Message, User} from '../types';
 import _ from 'lodash';
-import firestore from '@react-native-firebase/firestore';
+import firestore, {
+    FirebaseFirestoreTypes,
+} from '@react-native-firebase/firestore';
 
 function getChatKey(userIds: string[]) {
     return _.orderBy(userIds, userId => userId, 'asc');
@@ -13,6 +15,9 @@ function useChat(userIds: string[]) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [sending, setSending] = useState(false);
     const [loadingMessages, setLoadingMessages] = useState(false);
+    const [userToMessageReadAt, setUserToMessageReadAt] = useState<{
+        [userId: string]: Date;
+    }>({});
 
     async function loadUsers(uids: string[]) {
         const usersSnapshot = await firestore()
@@ -78,22 +83,23 @@ function useChat(userIds: string[]) {
             if (chat === null) throw new Error('Chat is not loaded');
             try {
                 setSending(true);
-                const data: FirestoreMessageData = {
-                    text: text,
-                    user: user,
-                    createdAt: new Date(),
-                };
 
                 const doc = await firestore()
                     .collection(Collections.CHATS)
                     .doc(chat.id)
                     .collection(Collections.MESSAGES)
-                    .add(data);
+                    .add({
+                        text: text,
+                        user: user,
+                        createdAt: firestore.FieldValue.serverTimestamp(),
+                    });
 
                 addNewMessages([
                     {
                         id: doc.id,
-                        ...data,
+                        text: text,
+                        user: user,
+                        createdAt: new Date(),
                     },
                 ]);
             } finally {
@@ -138,6 +144,51 @@ function useChat(userIds: string[]) {
         };
     }, [addNewMessages, chat?.id]);
 
+    const updateMessageReadAt = useCallback(
+        async (userId: string) => {
+            if (chat == null) return null;
+
+            firestore()
+                .collection(Collections.CHATS)
+                .doc(chat.id)
+                .update({
+                    [`userToMessageReadAt.${userId}`]:
+                        firestore.FieldValue.serverTimestamp(),
+                });
+        },
+        [chat],
+    );
+
+    useEffect(() => {
+        if (chat == null) return;
+
+        const unsubscribe = firestore()
+            .collection(Collections.CHATS)
+            .doc(chat.id)
+            .onSnapshot(snapshot => {
+                // local에서 변경되었을때
+                if (snapshot.metadata.hasPendingWrites) return;
+
+                const chatData = snapshot.data() ?? {};
+                const userToMessageReadTimestamp =
+                    chatData.userToMessageReadAt as {
+                        [userId: string]: FirebaseFirestoreTypes.Timestamp;
+                    };
+
+                const userToMessageReadDate = _.mapValues(
+                    userToMessageReadTimestamp,
+                    updateMessageReadTimestamp =>
+                        updateMessageReadTimestamp.toDate(),
+                );
+
+                setUserToMessageReadAt(userToMessageReadDate);
+            });
+
+        return () => {
+            unsubscribe();
+        };
+    }, [chat]);
+
     return {
         chat,
         loadingChat,
@@ -145,6 +196,8 @@ function useChat(userIds: string[]) {
         sending,
         sendMessage,
         loadingMessages,
+        updateMessageReadAt,
+        userToMessageReadAt,
     };
 }
 

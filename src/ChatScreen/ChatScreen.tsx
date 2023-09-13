@@ -185,7 +185,7 @@ export default function ChatScreen() {
                         return (
                             <Message
                                 name={user?.name ?? ''}
-                                text={message.text}
+                                text={message.text ?? ''}
                                 createdAt={message.createdAt}
                                 isOtherMessage={
                                     message.user.userId !== me?.userId

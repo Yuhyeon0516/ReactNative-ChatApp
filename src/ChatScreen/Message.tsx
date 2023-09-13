@@ -10,6 +10,7 @@ interface MessageProps {
     createdAt: Date;
     isOtherMessage: boolean;
     imageUrl?: string;
+    unreadCount?: number;
 }
 
 const styles = StyleSheet.create({
@@ -29,7 +30,6 @@ const styles = StyleSheet.create({
     timeText: {
         fontSize: 12,
         color: Colors.GRAY,
-        marginRight: 4,
     },
     bubble: {
         backgroundColor: Colors.BLACK,
@@ -53,13 +53,25 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
+    metaInfo: {
+        marginRight: 4,
+        alignItems: 'flex-end',
+    },
+    unreadCountText: {
+        fontSize: 12,
+        color: Colors.GRAY,
+    },
 });
 
 const otherMessageStyles = {
     container: [styles.container, {alignItems: 'flex-start' as const}],
     bubble: [styles.bubble, {backgroundColor: Colors.LIGHT_GRAY}],
     messageText: [styles.messageText, {color: Colors.BLACK}],
-    timeText: [styles.timeText, {marginRight: 0, marginLeft: 4}],
+    timeText: [styles.timeText],
+    metaInfo: [
+        styles.metaInfo,
+        {marginLeft: 4, marginRight: 0, alignItems: 'flex-start' as const},
+    ],
 };
 
 export default function Message({
@@ -68,19 +80,25 @@ export default function Message({
     createdAt,
     isOtherMessage,
     imageUrl,
+    unreadCount = 0,
 }: MessageProps) {
     const messageStyles = isOtherMessage ? otherMessageStyles : styles;
     const renderMessageContainer = useCallback(() => {
         const components = [
-            <Text key={'timeText'} style={messageStyles.timeText}>
-                {moment(createdAt).format('HH:mm')}
-            </Text>,
+            <View key={'metaInfo'} style={messageStyles.metaInfo}>
+                {unreadCount > 0 && (
+                    <Text style={styles.unreadCountText}>{unreadCount}</Text>
+                )}
+                <Text key={'timeText'} style={messageStyles.timeText}>
+                    {moment(createdAt).format('HH:mm')}
+                </Text>
+            </View>,
             <View key={'message'} style={messageStyles.bubble}>
                 <Text style={messageStyles.messageText}>{text}</Text>
             </View>,
         ];
         return isOtherMessage ? components.reverse() : components;
-    }, [createdAt, isOtherMessage, messageStyles, text]);
+    }, [createdAt, isOtherMessage, messageStyles, text, unreadCount]);
 
     return (
         <View style={styles.root}>

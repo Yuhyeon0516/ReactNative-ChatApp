@@ -1,4 +1,10 @@
-import React, {useCallback, useContext, useMemo, useState} from 'react';
+import React, {
+    useCallback,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
 import {
     ActivityIndicator,
     FlatList,
@@ -17,6 +23,7 @@ import {Colors} from '../modules/Colors';
 import AuthContext from '../components/AuthContext';
 import Message from './Message';
 import UserPhoto from '../components/UserPhoto';
+import moment from 'moment';
 
 const styles = StyleSheet.create({
     container: {
@@ -100,13 +107,23 @@ const disableSendButtonStyle = [
 
 export default function ChatScreen() {
     const {params} = useRoute<RouteProp<RootStackParamList, 'Chat'>>();
-    const {loadingChat, chat, sendMessage, messages, loadingMessages} = useChat(
-        params.userIds,
-    );
+    const {
+        loadingChat,
+        chat,
+        sendMessage,
+        messages,
+        loadingMessages,
+        updateMessageReadAt,
+        userToMessageReadAt,
+    } = useChat(params.userIds);
     const [text, setText] = useState('');
     const sendDisabled = useMemo(() => text.length === 0, [text.length]);
     const {user: me} = useContext(AuthContext);
     const loading = loadingChat || loadingMessages;
+
+    useEffect(() => {
+        if (me != null && !loadingMessages) updateMessageReadAt(me?.userId);
+    }, [loadingMessages, me, updateMessageReadAt]);
 
     const onChagneText = useCallback((newText: string) => {
         setText(newText);
@@ -152,6 +169,19 @@ export default function ChatScreen() {
                             u => u.userId === message.user.userId,
                         );
 
+                        const unreadUsers = chat.users.filter(u => {
+                            const messageReadAt =
+                                userToMessageReadAt[u.userId] ?? null;
+
+                            if (!messageReadAt) return true;
+
+                            return moment(messageReadAt).isBefore(
+                                message.createdAt,
+                            );
+                        });
+
+                        const unreadCount = unreadUsers.length - 1;
+
                         return (
                             <Message
                                 name={user?.name ?? ''}
@@ -161,6 +191,7 @@ export default function ChatScreen() {
                                     message.user.userId !== me?.userId
                                 }
                                 imageUrl={user?.profileUrl}
+                                unreadCount={unreadCount}
                             />
                         );
                     }}
@@ -200,6 +231,7 @@ export default function ChatScreen() {
         onPressSendButton,
         sendDisabled,
         text,
+        userToMessageReadAt,
     ]);
 
     return (

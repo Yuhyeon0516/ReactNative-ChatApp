@@ -119,6 +119,8 @@ function useChat(userIds: string[]) {
             .collection(Collections.MESSAGES)
             .orderBy('createdAt', 'desc')
             .onSnapshot(snapshot => {
+                if (snapshot.metadata.hasPendingWrites) return;
+
                 const newMessages = snapshot
                     .docChanges()
                     .filter(({type}) => type === 'added')

@@ -254,7 +254,16 @@ export default function ChatScreen() {
                             return (
                                 <Message
                                     {...commonProps}
-                                    message={{url: message.imageUrl}}
+                                    message={{imageUrl: message.imageUrl}}
+                                />
+                            );
+                        }
+
+                        if (message.audioUrl != null) {
+                            return (
+                                <Message
+                                    {...commonProps}
+                                    message={{audioUrl: message.audioUrl}}
                                 />
                             );
                         }

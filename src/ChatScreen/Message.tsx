@@ -4,6 +4,7 @@ import {View, Text, StyleSheet} from 'react-native';
 import {Colors} from '../modules/Colors';
 import UserPhoto from '../components/UserPhoto';
 import ImageMessage from './ImageMessage';
+import AudioMessage from './AudioMessage';
 
 const styles = StyleSheet.create({
     container: {
@@ -71,12 +72,16 @@ interface TextMessage {
 }
 
 interface ImageMessage {
-    url: string;
+    imageUrl: string;
+}
+
+interface AudioMessage {
+    audioUrl: string;
 }
 
 interface MessageProps {
     name: string;
-    message: TextMessage | ImageMessage;
+    message: TextMessage | ImageMessage | AudioMessage;
     createdAt: Date;
     isOtherMessage: boolean;
     userImageUrl?: string;
@@ -98,10 +103,19 @@ export default function Message({
                 <Text style={messageStyles.messageText}>{message.text}</Text>
             );
         }
-        if ('url' in message) {
-            return <ImageMessage url={message.url} />;
+        if ('imageUrl' in message) {
+            return <ImageMessage url={message.imageUrl} />;
         }
-    }, [message, messageStyles.messageText]);
+
+        if ('audioUrl' in message) {
+            return (
+                <AudioMessage
+                    url={message.audioUrl}
+                    isOtherMessage={isOtherMessage}
+                />
+            );
+        }
+    }, [isOtherMessage, message, messageStyles.messageText]);
 
     const renderMessageContainer = useCallback(() => {
         const components = [

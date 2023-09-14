@@ -9,6 +9,7 @@ const AuthContext = createContext<AuthContextProp>({
     signin: async () => {},
     processingSignin: false,
     updateProfileImage: async () => {},
+    addFcmToken: async () => {},
 });
 
 export default AuthContext;

@@ -7,6 +7,7 @@ import React, {
 } from 'react';
 import {
     ActivityIndicator,
+    Alert,
     FlatList,
     StyleSheet,
     Text,
@@ -25,6 +26,7 @@ import Message from './Message';
 import UserPhoto from '../components/UserPhoto';
 import moment from 'moment';
 import ImageCropPicker from 'react-native-image-crop-picker';
+import MicButton from './MicButton';
 
 const styles = StyleSheet.create({
     container: {
@@ -103,7 +105,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: Colors.BLACK,
         borderRadius: 8,
-        marginLeft: 8,
+        marginHorizontal: 8,
         width: 50,
         height: 50,
         alignItems: 'center',
@@ -166,6 +168,18 @@ export default function ChatScreen() {
             sendImageMessage(image.path, me);
         }
     }, [me, sendImageMessage]);
+
+    const onRecorded = useCallback((path: string) => {
+        Alert.alert('녹음이 완료되었습니다.', '음성 메시지를 보낼까요?', [
+            {text: 'No'},
+            {
+                text: 'Yes',
+                onPress: () => {
+                    console.log(path);
+                },
+            },
+        ]);
+    }, []);
 
     const renderChat = useCallback(() => {
         if (chat === null) return null;
@@ -282,6 +296,10 @@ export default function ChatScreen() {
                         onPress={onPressImageButton}>
                         <MaterialIcons name="image" style={styles.imageIcon} />
                     </TouchableOpacity>
+
+                    <View>
+                        <MicButton onRecorded={onRecorded} />
+                    </View>
                 </View>
             </View>
         );
@@ -296,6 +314,7 @@ export default function ChatScreen() {
         sending,
         text,
         userToMessageReadAt,
+        onRecorded,
     ]);
 
     return (

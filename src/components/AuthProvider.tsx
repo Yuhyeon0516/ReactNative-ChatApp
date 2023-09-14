@@ -94,6 +94,20 @@ function AuthProvider({children}: {children: React.ReactNode}) {
         [user],
     );
 
+    const addFcmToken = useCallback(
+        async (token: string) => {
+            if (user != null) {
+                await firestore()
+                    .collection(Collections.USERS)
+                    .doc(user?.userId)
+                    .update({
+                        fcmToekns: firestore.FieldValue.arrayUnion(token),
+                    });
+            }
+        },
+        [user],
+    );
+
     const value = useMemo(() => {
         return {
             initialized,
@@ -103,6 +117,7 @@ function AuthProvider({children}: {children: React.ReactNode}) {
             signin,
             processingSignin,
             updateProfileImage,
+            addFcmToken,
         };
     }, [
         initialized,
@@ -112,6 +127,7 @@ function AuthProvider({children}: {children: React.ReactNode}) {
         signup,
         updateProfileImage,
         user,
+        addFcmToken,
     ]);
 
     return (

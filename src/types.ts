@@ -24,6 +24,7 @@ export interface AuthContextProp {
     signin: (email: string, password: string) => Promise<void>;
     processingSignin: boolean;
     updateProfileImage: (filepath: string) => Promise<void>;
+    addFcmToken: (token: string) => Promise<void>;
 }
 
 export enum Collections {

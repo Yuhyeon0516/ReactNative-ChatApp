@@ -81,7 +81,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
-        targetSdkVersion 27
+        targetSdkVersion 33
         vectorDrawables.useSupportLibrary = true
     }
     signingConfigs {

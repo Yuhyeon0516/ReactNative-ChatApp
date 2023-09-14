@@ -138,6 +138,7 @@ export default function ChatScreen() {
         userToMessageReadAt,
         sendImageMessage,
         sending,
+        sendAudioMessage,
     } = useChat(params.userIds);
     const [text, setText] = useState('');
     const sendDisabled = useMemo(() => text.length === 0, [text.length]);
@@ -169,17 +170,22 @@ export default function ChatScreen() {
         }
     }, [me, sendImageMessage]);
 
-    const onRecorded = useCallback((path: string) => {
-        Alert.alert('녹음이 완료되었습니다.', '음성 메시지를 보낼까요?', [
-            {text: 'No'},
-            {
-                text: 'Yes',
-                onPress: () => {
-                    console.log(path);
+    const onRecorded = useCallback(
+        (path: string) => {
+            Alert.alert('녹음이 완료되었습니다.', '음성 메시지를 보낼까요?', [
+                {text: 'No'},
+                {
+                    text: 'Yes',
+                    onPress: () => {
+                        if (me != null) {
+                            sendAudioMessage(path, me);
+                        }
+                    },
                 },
-            },
-        ]);
-    }, []);
+            ]);
+        },
+        [me, sendAudioMessage],
+    );
 
     const renderChat = useCallback(() => {
         if (chat === null) return null;

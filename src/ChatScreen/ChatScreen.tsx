@@ -145,6 +145,14 @@ export default function ChatScreen() {
     const {user: me} = useContext(AuthContext);
     const loading = loadingChat || loadingMessages;
 
+    const other = useMemo(() => {
+        if (chat != null && me != null) {
+            return chat.users.filter(u => u.userId !== me.userId)[0];
+        }
+
+        return null;
+    }, [chat, me]);
+
     useEffect(() => {
         if (me != null && !loadingMessages) updateMessageReadAt(me?.userId);
     }, [loadingMessages, me, updateMessageReadAt]);
@@ -333,7 +341,7 @@ export default function ChatScreen() {
     ]);
 
     return (
-        <Screen title={params.other.name}>
+        <Screen title={other?.name}>
             <View style={styles.container}>
                 {loading ? (
                     <View style={styles.loadingContainer}>

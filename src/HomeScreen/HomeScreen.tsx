@@ -17,6 +17,7 @@ import {NavigationProp, useNavigation} from '@react-navigation/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import Profile from './Profile';
 import UserPhoto from '../components/UserPhoto';
+import messaging from '@react-native-firebase/messaging';
 
 const styles = StyleSheet.create({
     container: {
@@ -146,6 +147,28 @@ export default function HomeScreen() {
         [],
     );
 
+    // 1. 앱이 백그라운드에 있을때.
+
+    useEffect(() => {
+        const unsubscribe = messaging().onNotificationOpenedApp(
+            remoteMessage => {
+                console.log(remoteMessage);
+                const stringifiedUserIds = remoteMessage.data?.userIds;
+
+                if (stringifiedUserIds != null) {
+                    const userIds = JSON.parse(stringifiedUserIds) as string[];
+                    navigation.navigate('Chat', {userIds});
+                }
+            },
+        );
+
+        return () => {
+            unsubscribe();
+        };
+    }, [navigation]);
+
+    // 2. 앱이 종료 된 상태일때.
+
     useEffect(() => {
         loadUsers();
     }, [loadUsers]);
@@ -196,7 +219,6 @@ export default function HomeScreen() {
                                                     me.userId,
                                                     user.userId,
                                                 ],
-                                                other: user,
                                             });
                                         }}>
                                         <UserPhoto

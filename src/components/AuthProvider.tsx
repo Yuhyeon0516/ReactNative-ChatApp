@@ -101,7 +101,7 @@ function AuthProvider({children}: {children: React.ReactNode}) {
                     .collection(Collections.USERS)
                     .doc(user?.userId)
                     .update({
-                        fcmToekns: firestore.FieldValue.arrayUnion(token),
+                        fcmTokens: firestore.FieldValue.arrayUnion(token),
                     });
             }
         },

@@ -152,7 +152,6 @@ export default function HomeScreen() {
     useEffect(() => {
         const unsubscribe = messaging().onNotificationOpenedApp(
             remoteMessage => {
-                console.log(remoteMessage);
                 const stringifiedUserIds = remoteMessage.data?.userIds;
 
                 if (stringifiedUserIds != null) {
@@ -168,6 +167,19 @@ export default function HomeScreen() {
     }, [navigation]);
 
     // 2. 앱이 종료 된 상태일때.
+
+    useEffect(() => {
+        messaging()
+            .getInitialNotification()
+            .then(remoteMessage => {
+                const stringifiedUserIds = remoteMessage?.data?.userIds;
+
+                if (stringifiedUserIds != null) {
+                    const userIds = JSON.parse(stringifiedUserIds) as string[];
+                    navigation.navigate('Chat', {userIds});
+                }
+            });
+    }, [navigation]);
 
     useEffect(() => {
         loadUsers();

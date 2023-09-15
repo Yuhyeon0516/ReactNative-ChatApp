@@ -5,4 +5,5 @@ Please check the video below for detailed operation of the app.
 
 # Result
 
-![Video]()
+![Video](https://github.com/Yuhyeon0516/ReactNative-ChatApp-RNCLI/assets/120432007/eeb7e706-49a6-49a1-886a-97a3079bb87f)
+

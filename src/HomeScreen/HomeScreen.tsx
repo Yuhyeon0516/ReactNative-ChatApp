@@ -13,11 +13,16 @@ import Screen from '../components/Screen';
 import AuthContext from '../components/AuthContext';
 import {Colors} from '../modules/Colors';
 import {Collections, RootStackParamList, User} from '../types';
-import {NavigationProp, useNavigation} from '@react-navigation/native';
+import {
+    NavigationProp,
+    useIsFocused,
+    useNavigation,
+} from '@react-navigation/native';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import Profile from './Profile';
 import UserPhoto from '../components/UserPhoto';
 import messaging from '@react-native-firebase/messaging';
+import Toast from 'react-native-toast-message';
 
 const styles = StyleSheet.create({
     container: {
@@ -108,6 +113,7 @@ export default function HomeScreen() {
     const [loadingUsers, setLoadingUsers] = useState(false);
     const [users, setUsers] = useState<User[]>([]);
     const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+    const isFocused = useIsFocused();
 
     const onPressLogout = useCallback(() => {
         auth().signOut();
@@ -180,6 +186,38 @@ export default function HomeScreen() {
                 }
             });
     }, [navigation]);
+
+    // 3. 앱이 실행되어 있을때.
+
+    useEffect(() => {
+        const unsubscribe = messaging().onMessage(remoteMessage => {
+            const {notification} = remoteMessage;
+
+            if (notification != null && isFocused) {
+                const {title, body} = notification;
+
+                Toast.show({
+                    type: 'success',
+                    text1: title,
+                    text2: body,
+                    onPress: () => {
+                        const stringifiedUserIds = remoteMessage.data?.userIds;
+
+                        if (stringifiedUserIds != null) {
+                            const userIds = JSON.parse(
+                                stringifiedUserIds,
+                            ) as string[];
+                            navigation.navigate('Chat', {userIds});
+                        }
+                    },
+                });
+            }
+        });
+
+        return () => {
+            unsubscribe();
+        };
+    }, [isFocused, navigation]);
 
     useEffect(() => {
         loadUsers();
